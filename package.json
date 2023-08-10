@@ -15,7 +15,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "node app.js",
-		"dev": "nodemon app.js"
+		"dev": "nodemon app.js --ext js,graphql"
 	},
 	"devDependencies": {
 		"nodemon": "^3.0.1"
