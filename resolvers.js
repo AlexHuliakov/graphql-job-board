@@ -1,11 +1,16 @@
-import { getJobs, getJob, getCompanyJobs, createJob, deleteJob, updateJob } from './db/jobs.js';
+import { getJobs, getJob, getCompanyJobs, createJob, deleteJob, updateJob, getJobsCount } from './db/jobs.js';
 import { getCompany } from './db/companies.js';
 import { GraphQLError } from 'graphql';
 
 
 export const resolvers = {
     Query: {
-        jobs: () => getJobs(),
+        jobs: async () => {
+            return {
+                items: await getJobs(),
+                total: await getJobsCount()
+            };
+        },
         job: (parent, { id }) => {
             const job = getJob(id);
             if (!job) {
@@ -23,7 +28,7 @@ export const resolvers = {
     },
     Job: {
         date: (job) => job.createdAt.split('T')[0],
-        company: (job) => getCompany(job.companyId)
+        company: (job, _args, { companyLoader }) => companyLoader.load(job.companyId)
     },
     Company: {
         jobs: (company) => getCompanyJobs(company.id)

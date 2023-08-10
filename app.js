@@ -7,9 +7,10 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware as apolloMiddleware } from '@apollo/server/express4'
 import { readFile } from 'fs/promises';
 
-import { authMiddleware, handleLogin } from './auth.js';
-import { resolvers } from './resolvers.js';
 import { getUser } from './db/users.js';
+import { resolvers } from './resolvers.js';
+import { authMiddleware, handleLogin } from './auth.js';
+import { createCompanyLoader } from './db/companies.js';
 
 const PORT = process.env.APP_PORT || 9000;
 
@@ -26,10 +27,15 @@ const server = new ApolloServer({
 await server.start();
 
 const getContext = async ({ req }) => {
+  const context = {
+    companyLoader: createCompanyLoader()
+  };
+  
   if (req.auth) {
-    const user = await getUser(req.auth.sub);
-    return { user };
+    context.user = await getUser(req.auth.sub);
   }
+  
+  return context;
 };
 
 app.use('/graphql', apolloMiddleware(server, { 
